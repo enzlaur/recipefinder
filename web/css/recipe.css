@@ -1,0 +1,81 @@
+.id {
+	width:100px;
+	height:100px;
+}
+
+.home-des {
+	width:104px;
+	height:104px;
+}
+
+.box{
+	background-color: #477D47;
+	border-radius: 0.4em;
+	text-align: center;
+	box-shadow: inset 0px 0px 0px 1px rgba(255,255,255,0.15);
+	text-decoration: none;
+	color:white;
+	padding: 5px 15px 5px 15px;
+}
+
+.menu{
+    width:100%;
+    border-right:0px;
+    
+}
+td{
+    vertical-align: middle;
+}
+
+/*------------------- BOOTSTRAPPER ------------------*/
+.collapse {
+  display: none;
+}
+.collapse.in {
+  display: block;
+}
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: height .35s ease;
+          transition: height .35s ease;
+}
+
+.panel {
+  margin-bottom: 5px;
+  background-color: #fff;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+          box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+}
+.panel-heading {
+  padding: 10px 15px;
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+.panel-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 16px;
+  color: inherit;
+}
+.panel-group {
+  margin-bottom: 20px;
+}
+.panel-group .panel {
+  margin-bottom: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.panel-group .panel + .panel {
+  margin-top: 5px;
+}
+.panel-group .panel-heading {
+  border-bottom: 0;
+}
+.panel-body {
+  padding: 5px;
+}
