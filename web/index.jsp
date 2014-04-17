@@ -24,6 +24,7 @@
     ArrayList<Categories> noodle;
     ArrayList<Categories> nut;
     
+    //extra comment for testing
     beverage = RecipeDataContext.getBeverage();
     condiment = RecipeDataContext.getCondiment();
     fruit = RecipeDataContext.getFruit();
