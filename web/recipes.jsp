@@ -4,25 +4,27 @@
     Author     : cheskaalindao
 --%>
 
+<%@page import="classes.Recipe"%>
+<%@page import="classes.Categories"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="java.util.Map"%>
 <%@page import="DatabaseTransactions.RecipeDataContext"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%  ResultSet beverage;
-    ResultSet condiment;
-    ResultSet fruit;
-    ResultSet meat;
-    ResultSet poultry;
-    ResultSet rice;
-    ResultSet seafood;
-    ResultSet herb;
-    ResultSet vegetable;
-    ResultSet dairy;
-    ResultSet pastry;
-    ResultSet noodle;
-    ResultSet nut;
+<%  ArrayList<Categories> beverage;
+    ArrayList<Categories> condiment;
+    ArrayList<Categories> fruit;
+    ArrayList<Categories> meat;
+    ArrayList<Categories> poultry;
+    ArrayList<Categories> rice;
+    ArrayList<Categories> seafood;
+    ArrayList<Categories> herb;
+    ArrayList<Categories> vegetable;
+    ArrayList<Categories> dairy;
+    ArrayList<Categories> pastry;
+    ArrayList<Categories> noodle;
+    ArrayList<Categories> nut;
     
     beverage = RecipeDataContext.getBeverage();
     condiment = RecipeDataContext.getCondiment();
@@ -38,7 +40,10 @@
     noodle = RecipeDataContext.getNoodle();
     nut = RecipeDataContext.getNuts();
     Map AllParameters = request.getParameterMap();
-    ResultSet recipe;
+    ArrayList<Recipe> recipe;
+    
+    float arrSize;
+    int col;
     
     String allingredients = "";
     String specificIngredient = "";
@@ -171,30 +176,36 @@
           
           <%
             ArrayList recipeList = new ArrayList();
-            while(recipe.next()){
-          
-                HashMap tmprecipe = new HashMap(); // 
-                tmprecipe.put("id", recipe.getString("id"));
-                tmprecipe.put("name", recipe.getString("name"));
-                tmprecipe.put("price", recipe.getString("price"));
-                
-                recipeList.add(tmprecipe);
+            if(recipe.size() != 0){
+                for(int ctr= 0; ctr < recipe.size() ; ctr ++ ){
+                    Recipe rec = recipe.get(ctr);
+
+                    HashMap tmprecipe = new HashMap(); // 
+                    tmprecipe.put("id", rec.getId());
+                    tmprecipe.put("name", rec.getName());
+                    tmprecipe.put("price", rec.getPrice());
+
+                    recipeList.add(tmprecipe);
           %>
-          <div class="result result-<%= recipe.getString("id") %>">
+          <div class="result result-<%= rec.getId() %>">
           <div class="border3"></div>
           
           <div class="left">
-            <h3><%=recipe.getString("name")%>: Php<%=recipe.getString("price")%></h3>
+            <h3><%=rec.getName()%>: Php<%=rec.getPrice()%></h3>
           </div>
 
-          <div class="right menu-order"><a class="button" href="steps.jsp?id=<%=recipe.getString("id")%>&specificIngredient=<%=specificIngredient%>&allingredients=<%=allingredients%>&allbeverage=<%=allbeverage%>&allcondiment=<%=allcondiment%>&allfruit=<%=allfruit%>&allmeat=<%=allmeat%>&allpoultry=<%=allpoultry%>&allrice=<%=allrice%>&allseafood=<%=allseafood%>&allherb=<%=allherb%>&allvegetable=<%=allvegetable%>&alldairy=<%=alldairy%>&allpastry=<%=allpastry%>&allnoodle=<%=allnoodle%>&allnut=<%=allnut%>&allprices=<%= priceRange%>&mealtype=<%=mealtype%>&cuisine=<%= cuisine%>">See recipe</a></div>
-          <img src="<%=request.getContextPath()%>/images/recipe/<%=recipe.getString("picture")%>" class="left clear item" width="150" alt="">
+          <div class="right menu-order"><a class="button" href="steps.jsp?id=<%=rec.getId()%>&specificIngredient=<%=specificIngredient%>&allingredients=<%=allingredients%>&allbeverage=<%=allbeverage%>&allcondiment=<%=allcondiment%>&allfruit=<%=allfruit%>&allmeat=<%=allmeat%>&allpoultry=<%=allpoultry%>&allrice=<%=allrice%>&allseafood=<%=allseafood%>&allherb=<%=allherb%>&allvegetable=<%=allvegetable%>&alldairy=<%=alldairy%>&allpastry=<%=allpastry%>&allnoodle=<%=allnoodle%>&allnut=<%=allnut%>&allprices=<%= priceRange%>&mealtype=<%=mealtype%>&cuisine=<%= cuisine%>">See recipe</a></div>
+          <img src="<%=request.getContextPath()%>/images/recipe/<%=rec.getPicture()%>" class="left clear item" width="150" alt="">
           <p class="left">
-            <%=recipe.getString("description")%><br><br>   
+            <%=rec.getDescription()%><br><br>   
           </p>
           <div class="clear"></div>
           </div>
           <%
+                }
+            }
+            else{
+                out.println("<h1> No recipes to display. </h1>");
             }
             session.setAttribute("recipe", recipeList);
           %>
@@ -425,27 +436,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !beverage.isEmpty() ){
+                                      arrSize = beverage.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( beverage.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories beverages = beverage.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories beverage" value="<%=beverage.getString("name")%>"> <%=beverage.getString("name")%><br>
+                                        <input type="checkbox" class="categories beverage" value="<%=beverages.getName()%>"> <%=beverages.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( beverage.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories beverage" value="<%=beverage.getString("name")%>"> <%=beverage.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -467,27 +481,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !condiment.isEmpty() ){
+                                      arrSize = condiment.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( condiment.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories condiments = condiment.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories condiment" value="<%=condiment.getString("name")%>"> <%=condiment.getString("name")%><br>
+                                        <input type="checkbox" class="categories condiment" value="<%=condiments.getName()%>"> <%=condiments.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( condiment.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories condiment" value="<%=condiment.getString("name")%>"> <%=condiment.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -509,27 +526,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !fruit.isEmpty() ){
+                                      arrSize = fruit.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( fruit.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories fruits = fruit.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories fruit" value="<%=fruit.getString("name")%>"> <%=fruit.getString("name")%><br>
+                                        <input type="checkbox" class="categories fruit" value="<%=fruits.getName()%>"> <%=fruits.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( fruit.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories fruit" value="<%=fruit.getString("name")%>"> <%=fruit.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -551,27 +571,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !meat.isEmpty() ){
+                                      arrSize = meat.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( meat.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories meats = meat.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories meat" value="<%=meat.getString("name")%>"> <%=meat.getString("name")%><br>
+                                        <input type="checkbox" class="categories meat" value="<%=meats.getName()%>"> <%=meats.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( meat.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories meat" value="<%=meat.getString("name")%>"> <%=meat.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -593,27 +616,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !poultry.isEmpty() ){
+                                      arrSize = poultry.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( poultry.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories poultries = poultry.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories poultry" value="<%=poultry.getString("name")%>"> <%=poultry.getString("name")%><br>
+                                        <input type="checkbox" class="categories poultry" value="<%=poultries.getName()%>"> <%=poultries.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( poultry.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories poultry" value="<%=poultry.getString("name")%>"> <%=poultry.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -635,27 +661,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !rice.isEmpty() ){
+                                      arrSize = rice.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( rice.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories rices = rice.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories rice" value="<%=rice.getString("name")%>"> <%=rice.getString("name")%><br>
+                                        <input type="checkbox" class="categories rice" value="<%=rices.getName()%>"> <%=rices.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( rice.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories rice" value="<%=rice.getString("name")%>"> <%=rice.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -677,27 +706,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !seafood.isEmpty() ){
+                                      arrSize = seafood.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( seafood.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories seafoods = seafood.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories seafood" value="<%=seafood.getString("name")%>"> <%=seafood.getString("name")%><br>
+                                        <input type="checkbox" class="categories seafood" value="<%=seafoods.getName()%>"> <%=seafoods.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( seafood.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories seafood" value="<%=seafood.getString("name")%>"> <%=seafood.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -719,27 +751,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !herb.isEmpty() ){
+                                      arrSize = herb.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( herb.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories herbs = herb.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories herb" value="<%=herb.getString("name")%>"> <%=herb.getString("name")%><br>
+                                        <input type="checkbox" class="categories herb" value="<%=herbs.getName()%>"> <%=herbs.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( herb.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories herb" value="<%=herb.getString("name")%>"> <%=herb.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -761,27 +796,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !vegetable.isEmpty() ){
+                                      arrSize = vegetable.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( vegetable.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories vegetables = vegetable.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories vegetable" value="<%=vegetable.getString("name")%>"> <%=vegetable.getString("name")%><br>
+                                        <input type="checkbox" class="categories vegetable" value="<%=vegetables.getName()%>"> <%=vegetables.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( vegetable.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories vegetable" value="<%=vegetable.getString("name")%>"> <%=vegetable.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -803,27 +841,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !dairy.isEmpty() ){
+                                      arrSize = dairy.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( dairy.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories dairies = dairy.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories dairy" value="<%=dairy.getString("name")%>"> <%=dairy.getString("name")%><br>
+                                        <input type="checkbox" class="categories dairy" value="<%=dairies.getName()%>"> <%=dairies.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( dairy.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories dairy" value="<%=dairy.getString("name")%>"> <%=dairy.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -845,27 +886,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !pastry.isEmpty() ){
+                                      arrSize = pastry.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( pastry.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories pastries = pastry.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories pastry" value="<%=pastry.getString("name")%>"> <%=pastry.getString("name")%><br>
+                                        <input type="checkbox" class="categories pastry" value="<%=pastries.getName()%>"> <%=pastries.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( pastry.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories pastry" value="<%=pastry.getString("name")%>"> <%=pastry.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -887,27 +931,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !noodle.isEmpty() ){
+                                      arrSize = noodle.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( noodle.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories noodles = noodle.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories noodle" value="<%=noodle.getString("name")%>"> <%=noodle.getString("name")%><br>
+                                        <input type="checkbox" class="categories noodle" value="<%=noodles.getName()%>"> <%=noodles.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( noodle.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories noodle" value="<%=noodle.getString("name")%>"> <%=noodle.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>
@@ -929,27 +976,30 @@
                             <center>
                                 <table style="text-align:left">
                                     <tr>
+                                <% 
+                                    if( !nut.isEmpty() ){
+                                      arrSize = nut.size();
+                                      col = (int) Math.ceil(arrSize/5);
+                                        for(int ctr = 0 ; ctr < col ; ctr ++){
+                                            
+                                            int start = ctr * 5;
+                                            float stop = start + 5;
+                                            if( stop > arrSize){
+                                                stop = arrSize;
+                                            }
+                                %>      
                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( nut.next() ) 
-                                    {
+                                <%            for( int ctr2 = start ; ctr2 < stop ; ctr2++ ){
+                                                Categories nuts = nut.get(ctr2);
                                 %>
-                                        <input type="checkbox" class="categories nut" value="<%=nut.getString("name")%>"> <%=nut.getString("name")%><br>
+                                        <input type="checkbox" class="categories nut" value="<%=nuts.getName()%>"> <%=nuts.getName()%><br>
 
-                                <%  } 
-                                   }   %>
-                                        </td>
-
-                                        <td>
-                                <% for(int ctr = 0 ; ctr < 5 ; ctr ++){
-                                    if( nut.next() ) 
-                                    {
+                                <%          }
                                 %>
-                                        <input type="checkbox" class="categories nut" value="<%=nut.getString("name")%>"> <%=nut.getString("name")%><br>
-
-                                <%  } 
-                                   }   %>
-                                        </td>
+                                       </td>
+                                <%       }
+                                    }
+                                %>
                                     </tr>
                                 </table>
                             </center>

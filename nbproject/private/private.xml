@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/C:/Users/paulo/Desktop/COMALGO%20html/RecipeFinder%20-%20Final/web/index.jsp</file>
-        <file>file:/C:/Users/paulo/Desktop/COMALGO%20html/RecipeFinder%20-%20Final/src/java/DatabaseTransactions/RecipeDataContext.java</file>
-        <file>file:/C:/Users/paulo/Desktop/COMALGO%20html/RecipeFinder%20-%20Final/src/java/settings/Database.java</file>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/DatabaseTransactions/RecipeDataContext.java</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/servlets/AddIngredientServlet.java</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/web/index.jsp</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/DatabaseTransactions/EditRecipeDataContext.java</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/servlets/RecipePicServlet.java</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/DatabaseTransactions/IngredientsDataContext.java</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/web/admin-index.jsp</file>
+            <file>file:/C:/Tomcat/webapps/laurenz/recipefinder/src/java/settings/Database.java</file>
+        </group>
     </open-files>
 </project-private>

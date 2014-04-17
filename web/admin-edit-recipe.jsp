@@ -4,14 +4,17 @@
     Author     : cheskaalindao
 --%>
 
+<%@page import="classes.Ingredient"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="classes.Recipe"%>
 <%@page import="DatabaseTransactions.RecipeDataContext"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
 
     int id = Integer.parseInt(request.getParameter("id"));
-    ResultSet recipe = RecipeDataContext.getRecipe(id);
-    ResultSet ingredients = RecipeDataContext.getRecipeIngredients(id);
+    Recipe recipe = RecipeDataContext.getRecipe(id);
+    ArrayList<Ingredient> ingredients = RecipeDataContext.getRecipeIngredients(id);
     ResultSet  allMealTypes = RecipeDataContext.getAllPreferences("Meal Type");
     ResultSet  allCuisines = RecipeDataContext.getAllPreferences("Cuisine");
     ResultSet  allCategories = RecipeDataContext.getAllCategories();
@@ -77,7 +80,7 @@
                     <h4>Edit Recipe</h4>
                     <div class="border2"></div>
                     
-                    <%recipe.next();%>
+                    <%if(recipe != null){%>
                     <br>
 
                     <center>
@@ -86,7 +89,7 @@
                             <tr style="border:1px dashed #9c5959">
                                 <td width="30%"><center><h6>Photo</h6></center></td>
                                 <td>
-                                    <img src="<%=request.getContextPath()%>/images/recipe/<%=recipe.getString("picture")%>" class="left clear item" width="150" alt=""><br>
+                                    <img src="<%=request.getContextPath()%>/images/recipe/<%=recipe.getPicture()%>" class="left clear item" width="150" alt=""><br>
 
                                     <form name="upload-photo" enctype="multipart/form-data" id="upload-photo" method="post" class="form-signin" action="RecipePicServlet?upload-type=recipe-pic&id=<%=id%>" onSubmit="validateFileUpload(this); return false">
                                         Select another photo:
@@ -105,7 +108,7 @@
                                 <input type="hidden" id="recipe-id" name="recipe-id" value="<%=id%>">
                                 <td width="30%"><center><h6>Recipe Name</h6></center></td>
                                 <td>
-                                    <input id="rname" name="rname" value="<%=recipe.getString("name")%>" type="text" style="width:600px;" placeholder="Recipe Name"><br/>
+                                    <input id="rname" name="rname" value="<%=recipe.getName()%>" type="text" style="width:600px;" placeholder="Recipe Name"><br/>
                                     <span id="error-rname"></span>
                                 </td>
                             </tr>
@@ -145,27 +148,27 @@
                             <tr style="border:1px dashed #9c5959">
                                 <td><center><h6>Description</h6></center></td>
                                 <td>
-                                    <textarea id="description" name="description" style="width:600px;" placeholder="Description"><%=recipe.getString("description")%></textarea>
+                                    <textarea id="description" name="description" style="width:600px;" placeholder="Description"><%=recipe.getDescription()%></textarea>
                                 </td>
                             </tr>
                             <tr style="border:1px dashed #9c5959">
                                 <td><center><h6>Price</h6></center></td>
                                 <td>
-                                    <input id="price" name="price" value="<%=recipe.getString("price")%>" type="text" style="width:600px;" placeholder="Price">
+                                    <input id="price" name="price" value="<%=recipe.getPrice()%>" type="text" style="width:600px;" placeholder="Price">
                                     <span id="error-price"></span>
                                 </td>
                             </tr>
                             <tr style="border:1px dashed #9c5959">
                                 <td><center><h6>Serving</h6></center></td>
                                 <td>
-                                    <input id="serving" name="serving" value="<%=recipe.getString("serving")%>" type="text" style="width:600px;" placeholder="Serving">
+                                    <input id="serving" name="serving" value="<%=recipe.getServing()%>" type="text" style="width:600px;" placeholder="Serving">
                                     <span id="error-serving"></span>
                                 </td>
                             </tr>
                             <tr style="border:1px dashed #9c5959">
                                 <td><center><h6>Time</h6></center></td>
                                 <td>
-                                    <input id="time" name="time" value="<%=recipe.getString("time")%>" type="text" style="width:600px;" placeholder="Time">
+                                    <input id="time" name="time" value="<%=recipe.getTime()%>" type="text" style="width:600px;" placeholder="Time">
                                     <span id="error-time"></span>
                                 </td>
                             </tr>
@@ -184,15 +187,18 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <%while(ingredients.next()){%>
+                                            <%
+                                                for(int ctr = 0; ctr < ingredients.size() ; ctr++){
+                                                    Ingredient ingredient = ingredients.get(ctr);
+                                            %>
                                                 <tr>  
-                                                    <td><input name='ingredient-quantity' class='ingredient-quantity' value="<%=ingredients.getString("ingredient_qty")%>" /></td>
+                                                    <td><input name='ingredient-quantity' class='ingredient-quantity' value="<%=ingredient.getIngredient_qty()%>" /></td>
                                                     <td>
-                                                        <input name='ingredient-id' class='ingredient-id' type='hidden' value="<%=ingredients.getInt("id")%>"/>
-                                                        <input class='ingredient-name' value="<%=ingredients.getString("name")%>" readonly='readonly' />
+                                                        <input name='ingredient-id' class='ingredient-id' type='hidden' value="<%=ingredient.getId()%>"/>
+                                                        <input class='ingredient-name' value="<%=ingredient.getName()%>" readonly='readonly' />
                                                     </td>  
-                                                    <td><input name='ingredient-description' value="<%=ingredients.getString("ingredient_info")%>" class='ingredient-description' /></td>
-                                                    <td><span class='ingredient-category'><%=ingredients.getString("category")%></span></td>
+                                                    <td><input name='ingredient-description' value="<%=ingredient.getIngredient_info()%>" class='ingredient-description' /></td>
+                                                    <td><span class='ingredient-category'><%=ingredient.getCategory()%></span></td>
                                                     <td><a href='#' class='delete-ingredient'>Delete</a></td>
                                                 </tr>
                                             <%}%>
@@ -208,7 +214,7 @@
                             <tr style="border:1px dashed #9c5959">
                                 <td><center><h6>Procedures</h6></center></td>
                                 <td>
-                                    <textarea name="procedures" id="procedures" style="width:600px;"><%=recipe.getString("procedures")%></textarea>
+                                    <textarea name="procedures" id="procedures" style="width:600px;"><%=recipe.getProcedure()%></textarea>
                                     <span id="error-procedures"></span>
                                 </td>
                             </tr>
@@ -216,6 +222,7 @@
                         <button type="submit" class="button" href="">Save</button>
                      </form>
                     </center>
+                  <% } %>                  
                 </article>
             </div>
         </div>

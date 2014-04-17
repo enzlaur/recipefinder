@@ -4,6 +4,9 @@
  */
 package DatabaseTransactions;
 
+import classes.Categories;
+import classes.Ingredient;
+import classes.Recipe;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,10 +24,10 @@ public class RecipeDataContext {
     static PreparedStatement statement = null;
     static ResultSet result = null;
     
-    private static String user = "paulo";
-    private static String pass = "123456";
+    private static String user = "root";
+    private static String pass = "1234";
     private static final String host = "localhost";
-    private static final String port = "3306";
+    private static final String port = "3307";
     private static String url = "jdbc:mysql://" + host + ":" + port + "/recipe_finder";
 
     public static Connection connect() throws ClassNotFoundException, SQLException {
@@ -49,26 +52,34 @@ public class RecipeDataContext {
         
     }
 
-    public static ResultSet getRecipe(int id) throws SQLException{
+    public static Recipe getRecipe(int id) throws SQLException{
         try{
             
             Connection c = connect();
             statement = c.prepareStatement("select * from recipe where id=?");
             statement.setInt(1, id);
             result = statement.executeQuery();
-            return result;
+            if(result.next()){
+                Recipe recipe = new Recipe(result.getInt("id"), result.getString("name"), result.getFloat("price"),
+                        result.getInt("serving"), result.getString("time"), result.getString("procedures"),
+                        result.getString("description"), result.getString("picture"));
+                c.close();
+                return recipe;
+            }
             
         }
         catch(Exception ex){
             return null;
         }
+        return null;
         
     }
     
-    public static ResultSet getRecipeIngredients(int id) throws SQLException{ //nag-add ako ng id sa select. old version of this has no id; added category
+    public static ArrayList<Ingredient> getRecipeIngredients(int id) throws SQLException, ClassNotFoundException{ //nag-add ako ng id sa select. old version of this has no id; added category
+        ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
+        Connection c = connect();
         try{
             
-            Connection c = connect();
             statement = c.prepareStatement("select i.id, ri.ingredient_qty, i.name, ri.ingredient_info, ic.name as category "+
                                             "from recipe_ingredient as ri "+
                                             "inner join ingredient as i "+
@@ -78,31 +89,46 @@ public class RecipeDataContext {
                                             "where id_recipe=? ");
             statement.setInt(1, id);
             result = statement.executeQuery();
-            return result;
-            
+            while(result.next()){
+                Ingredient ingredient = new Ingredient(result.getInt("id"), result.getString("ingredient_qty"),
+                        result.getString("name"), result.getString("ingredient_info"), result.getString("category"));
+                ingredients.add(ingredient);
+            }
         }
+        
         catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return ingredients;
         
     }
     
-    public static ResultSet getRecipeList(String search) throws SQLException{
+    public static ArrayList<Recipe> getRecipeList(String search) throws SQLException, ClassNotFoundException{
+        ArrayList<Recipe> recipes = new ArrayList<Recipe>();
+        Connection c = connect();
         try{
             
-            Connection c = connect();
+            
             statement = c.prepareStatement("select * "+
                                             "from recipe "+
                                             "where name like ? "+
                                             "order by name;");
             statement.setString(1, "%" + search + "%");
             result = statement.executeQuery();
-            return result;
-            
+            while(result.next()){
+                Recipe recipe = new Recipe(result.getInt("id"), result.getString("name"), result.getFloat("price"),
+                        result.getInt("serving"), result.getString("time"), result.getString("procedures"),
+                        result.getString("description"), result.getString("picture"));
+                recipes.add(recipe);
+            }
         }
+        
         catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return recipes;
         
     }
     
@@ -201,11 +227,11 @@ public class RecipeDataContext {
     }
     
     
-    public static ResultSet getRecipeList (String specificIngredient, String ingredient, String price, String mealtype, String cuisine) throws SQLException{
-        try{
-            
-            Connection c = connect();
-            String stmt = "select DISTINCT r.id, r.name, r.price, r.serving, r.time, r.procedures, r.description, r.picture\n" +
+    public static ArrayList<Recipe> getRecipeList (String specificIngredient, String ingredient, String price, String mealtype, String cuisine) throws SQLException, ClassNotFoundException{
+        ArrayList<Recipe> recipes = new ArrayList<Recipe>();
+        Connection c = connect();
+        
+        String stmt = "select DISTINCT r.id, r.name, r.price, r.serving, r.time, r.procedures, r.description, r.picture\n" +
                                             "from recipe as r\n" +
                                             "inner join recipe_ingredient as ri \n" +
                                             "on r.id = ri.id_recipe\n" +
@@ -233,6 +259,9 @@ public class RecipeDataContext {
                 stmt+= " ";
             }
             else if(!specificIngredient.isEmpty()){
+                if(!ingredient.isEmpty()){
+                    stmt+= " ( ";
+                }
                 stmt+= " ( i.name LIKE ? )";
                 filter++;
             }
@@ -261,27 +290,31 @@ public class RecipeDataContext {
                         stmt+=",";
                     }
                 }
-                stmt+= " ) ) ";
+                stmt+= " ) )";
+                if(!specificIngredient.isEmpty()){
+                    stmt+= " ) ";
+                }
             }
-            
-            
-            
             statement = c.prepareStatement(stmt); //tsaka mo lng i-prepare kapag ok na lahat sa query
+            
+        try{
+            
+            
             System.out.println(stmt);
-            System.out.print("length is " + ingredientslist.length+  " ");
+            //System.out.print("length is " + ingredientslist.length+  " ");
             
             // setting of parameters
             //  setting of price
             ArrayList priceRange = separateString(price);
             statement.setString(1, priceRange.get(0).toString());
             statement.setString(2, priceRange.get(1).toString());
-            System.out.println(priceRange.get(0).toString() + " " + priceRange.get(1).toString() + " is price range");
+           // System.out.println(priceRange.get(0).toString() + " " + priceRange.get(1).toString() + " is price range");
             
             //set mealtype & cuisine
             if(!mealtype.isEmpty() || !cuisine.isEmpty()) {
                 statement.setString(3, mealtype);
                 statement.setString(4, cuisine);
-                System.out.println(mealtype + cuisine);
+                //System.out.println(mealtype + cuisine);
             }
             
             //set specific ingredient
@@ -297,68 +330,73 @@ public class RecipeDataContext {
             if(!ingredient.isEmpty()){
                 if((!mealtype.isEmpty() || !cuisine.isEmpty()) && specificIngredient.isEmpty()){
                     for( int ctr = 5; ctr < ingredientslist.length + 5; ctr++ ){
-                        System.out.println("LOL5");
-                        int tmp = ctr;
-                        int ans = tmp -5;
-                        int lengthofilist = ingredientslist.length + 5;
-                        System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 5].toString() + " " + tmp);
-                        System.out.println(lengthofilist);
+                        //System.out.println("LOL5");
+                        //int tmp = ctr;
+                        //int ans = tmp -5;
+                        //int lengthofilist = ingredientslist.length + 5;
+                        //System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 5].toString() + " " + tmp);
+                        //System.out.println(lengthofilist);
                         statement.setString(ctr, ingredientslist[ctr - 5].toString());
 
                     }
                 }
                 else if((!mealtype.isEmpty() || !cuisine.isEmpty()) && !specificIngredient.isEmpty()){
                     for( int ctr = 6; ctr < ingredientslist.length + 6; ctr++ ){
-                        System.out.println("LOLX");
-                        int tmp = ctr;
-                        int ans = tmp -6;
-                        int lengthofilist = ingredientslist.length + 6;
-                        System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 6].toString() + " " + tmp);
-                        System.out.println(lengthofilist);
+                        //System.out.println("LOLX");
+                        //int tmp = ctr;
+                        //int ans = tmp -6;
+                        //int lengthofilist = ingredientslist.length + 6;
+                        //System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 6].toString() + " " + tmp);
+                        //System.out.println(lengthofilist);
                         statement.setString(ctr, ingredientslist[ctr - 6].toString());
 
                     }
                 }
                 else if( (mealtype.isEmpty() || cuisine.isEmpty()) && specificIngredient.isEmpty() ){
                     for( int ctr = 3; ctr < ingredientslist.length + 3; ctr++ ){
-                        System.out.println("LOL3");
-                        int tmp = ctr;
-                        int ans = tmp -3;
-                        int lengthofilist = ingredientslist.length + 3;
-                        System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 3].toString() + " " + tmp);
-                        System.out.println(lengthofilist);
+                        //System.out.println("LOL3");
+                        //int tmp = ctr;
+                        //int ans = tmp -3;
+                        //int lengthofilist = ingredientslist.length + 3;
+                        //System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 3].toString() + " " + tmp);
+                        //System.out.println(lengthofilist);
                         statement.setString(ctr, ingredientslist[ctr - 3].toString());
                     }
                 }
                 else if ((mealtype.isEmpty() || cuisine.isEmpty()) && !specificIngredient.isEmpty()){
                     for( int ctr = 4; ctr < ingredientslist.length + 4; ctr++ ){
-                        System.out.println("LOL");
-                        int tmp = ctr;
-                        int ans = tmp -4;
-                        int lengthofilist = ingredientslist.length + 4;
-                        System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 4].toString() + " " + tmp);
-                        System.out.println(lengthofilist);
+                        //System.out.println("LOL");
+                        //int tmp = ctr;
+                        //int ans = tmp -4;
+                        //int lengthofilist = ingredientslist.length + 4;
+                        //System.out.println("ingredientslist[" + ans + "] is " + ingredientslist[ctr - 4].toString() + " " + tmp);
+                        //System.out.println(lengthofilist);
                         statement.setString(ctr, ingredientslist[ctr - 4].toString());
                     }
                 }
                 
                 
             }
-            
             result = statement.executeQuery();
-            return result;
+            while(result.next()){
+                Recipe recipe = new Recipe(result.getInt("id"), result.getString("name"), result.getFloat("price"),
+                        result.getInt("serving"), result.getString("time"), result.getString("procedures"),
+                        result.getString("description"), result.getString("picture"));
+                recipes.add(recipe);
+            }
         }
         
         catch(Exception ex){
             ex.printStackTrace();
         }
-        return null;
+        c.close();
+        return recipes;
     }
     
-    public static ResultSet getBeverage() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getBeverage() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -368,18 +406,23 @@ public class RecipeDataContext {
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
                                             "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
-        
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getCondiment() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getCondiment() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -388,18 +431,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Condiments'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getFruit() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getFruit() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -408,18 +457,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Fruits'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getMeat() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getMeat() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -428,18 +483,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Meat'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getPoultry() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getPoultry() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -448,18 +509,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Poultry'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getRice() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getRice() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -468,18 +535,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Rice'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getSeafood() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getSeafood() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -488,18 +561,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Seafood'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getHerb() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getHerb() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -508,18 +587,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Herbs & Spices'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getVegetable() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getVegetable() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -528,18 +613,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Vegetables'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getDairy() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getDairy() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -548,18 +639,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Dairy'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getPastry() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getPastry() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -568,18 +665,24 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Pastry'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getNoodle() throws SQLException, ClassNotFoundException{
-        try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
+    public static ArrayList<Categories> getNoodle() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
                                             "FROM ingredient as i\n" +
                                             "INNER JOIN recipe_ingredient AS ri\n" +
                                             "ON i.id = ri.id_ingredient\n" +
@@ -588,32 +691,44 @@ public class RecipeDataContext {
                                             "WHERE ic.name='Noodle'\n" +
                                             "GROUP BY ri.id_ingredient \n" +
                                             "ORDER BY count(i.name) DESC\n" +
-                                            "LIMIT 10;"  );
+                                            "LIMIT 10;" );
+        try{
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
-    public static ResultSet getNuts() throws SQLException, ClassNotFoundException{
+   public static ArrayList<Categories> getNuts() throws SQLException, ClassNotFoundException{
+        ArrayList<Categories> categories = new ArrayList<Categories>();
+        Connection c = connect();
+        statement = c.prepareStatement( "SELECT i.name\n" +
+                                            "FROM ingredient as i\n" +
+                                            "INNER JOIN recipe_ingredient AS ri\n" +
+                                            "ON i.id = ri.id_ingredient\n" +
+                                            "INNER JOIN ingredient_category AS ic\n" +
+                                            "ON ic.id = i.id_category\n" +
+                                            "WHERE ic.name='Nuts'\n" +
+                                            "GROUP BY ri.id_ingredient \n" +
+                                            "ORDER BY count(i.name) DESC\n" +
+                                            "LIMIT 10;" );
         try{
-            Connection c = connect();
-            statement = c.prepareStatement( "SELECT i.name, ic.name\n" +
-                                        "FROM ingredient as i\n" +
-                                        "INNER JOIN recipe_ingredient AS ri\n" +
-                                        "ON i.id = ri.id_ingredient\n" +
-                                        "INNER JOIN ingredient_category AS ic\n" +
-                                        "ON ic.id = i.id_category\n" +
-                                        "WHERE ic.name='Nuts'\n" +
-                                        "GROUP BY ri.id_ingredient \n" +
-                                        "ORDER BY count(i.name) DESC\n" +
-                                        "LIMIT 10;"  );
             result = statement.executeQuery();
-            return result; 
+            while(result.next()){
+                Categories category = new Categories(result.getString("name"));
+                categories.add(category);
+            }
         }catch(Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        c.close();
+        return categories;
     }
     
     
