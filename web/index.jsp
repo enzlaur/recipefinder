@@ -824,14 +824,14 @@
         <div class="border2"></div>
         <br />
         <!--
-        Sorry Kuya Gupta
+        Sorry Kuya Gupta-->
             <span class="copyright">
               <span class="right"><br>
                 Design by <a href="http://www.priteshgupta.com">PriteshGupta.com</a>
                 <br><br><br>
               </span>
             </span>
-        -->
+        
       </footer>
     </div>
   </body>

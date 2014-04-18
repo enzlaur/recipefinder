@@ -1044,7 +1044,7 @@
 
         <br>
         <!--
-        Sorry kuya Gupta :()
+        Sorry kuya Gupta :( -->
         <span class="copyright">
           <span class="left"><br>
             &copy; Copyright 2014 - All Rights Reserved - <a href="#">De La Salle University</a>
@@ -1054,7 +1054,7 @@
             <br><br><br>
           </span>
         </span>
-        -->
+        
       </footer>
 
     </div>

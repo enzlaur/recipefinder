@@ -153,7 +153,8 @@
                      dataType:"json",
                      success:sortsuccess,
                      error:sorterror,
-                     url:"http://localhost:8084/RecipeFinder/sort/name"
+                     //url:"http://localhost:8084/RecipeFinder/sort/name"
+                     url: "/sort/name"
                  });
                  
                  function sortsuccess(data, text){
@@ -1113,14 +1114,14 @@
         
         <br>
         <!--
-        Sorry kuya Gupta
+        Sorry kuya Gupta -->
         <span class="copyright">
           <span class="right"><br>
             Design by <a href="http://www.priteshgupta.com">PriteshGupta.com</a>
             <br><br><br>
           </span>
         </span>
-        -->
+        
       </footer>
     </div>
   </body>
