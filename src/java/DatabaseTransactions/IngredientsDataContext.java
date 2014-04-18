@@ -4,6 +4,8 @@
  */
 package DatabaseTransactions;
 
+import settings.Database;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,7 +25,8 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             
             String selectSql = "select i.*, ic.`name` as category  " +
                 "from `ingredient` as i " +
@@ -55,7 +58,8 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             
             String countSql = "select count(id) as totalRecords from `ingredient` where `name` like concat('%', ?, '%') ";
             
@@ -84,8 +88,9 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
-
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("select i.id, i.name as ingredient, ic.name as category "+
                                             "from ingredient as i "+
                                             "inner join ingredient_category as ic "+
@@ -109,8 +114,9 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
-
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("select * from ingredient_category");    
             result = statement.executeQuery();           
             
@@ -127,8 +133,9 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
-
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("insert into ingredient(`name`, `id_category`) values(?, ?)");    
 
             statement.setString(1, ingredient);
@@ -144,7 +151,8 @@ public class IngredientsDataContext {
     public static boolean isIngredientExists(String name) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             statement = con.prepareStatement("SELECT name FROM `ingredient` where name = ?");
             statement.setString(1, name);
             result = statement.executeQuery();
@@ -165,8 +173,9 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
-
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("select i.name as ingredient, ic.id, ic.name as category "+
                                             "from ingredient as i "+
                                             "inner join ingredient_category as ic "+
@@ -189,8 +198,9 @@ public class IngredientsDataContext {
         try{
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
-
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("update ingredient set name = ?, id_category = ? where id = ?");    
 
             statement.setString(1, ingredient);
@@ -207,7 +217,9 @@ public class IngredientsDataContext {
     public static void deleteIngredient(int id) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
+            
             statement = con.prepareStatement("DELETE from ingredient where id = ?");
             statement.setInt(1, id);
             statement.executeUpdate();

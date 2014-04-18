@@ -4,9 +4,11 @@
  */
 package DatabaseTransactions;
 
+import settings.Database;
 import classes.Categories;
 import classes.Ingredient;
 import classes.Recipe;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,10 +32,11 @@ public class RecipeDataContext {
     private static final String port = "3307";
     private static String url = "jdbc:mysql://" + host + ":" + port + "/recipe_finder";
 
-    public static Connection connect() throws ClassNotFoundException, SQLException {
+    public static Connection connect() throws ClassNotFoundException, SQLException, URISyntaxException {
         Connection conn;
         Class.forName("com.mysql.jdbc.Driver");
-        conn = DriverManager.getConnection(url, user, pass);
+        //conn = DriverManager.getConnection(url, user, pass);
+        conn = Database.getConnection();
         return conn;
     }
     
@@ -75,7 +78,7 @@ public class RecipeDataContext {
         
     }
     
-    public static ArrayList<Ingredient> getRecipeIngredients(int id) throws SQLException, ClassNotFoundException{ //nag-add ako ng id sa select. old version of this has no id; added category
+    public static ArrayList<Ingredient> getRecipeIngredients(int id) throws SQLException, ClassNotFoundException, URISyntaxException{ //nag-add ako ng id sa select. old version of this has no id; added category
         ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
         Connection c = connect();
         try{
@@ -104,7 +107,7 @@ public class RecipeDataContext {
         
     }
     
-    public static ArrayList<Recipe> getRecipeList(String search) throws SQLException, ClassNotFoundException{
+    public static ArrayList<Recipe> getRecipeList(String search) throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Recipe> recipes = new ArrayList<Recipe>();
         Connection c = connect();
         try{
@@ -227,7 +230,7 @@ public class RecipeDataContext {
     }
     
     
-    public static ArrayList<Recipe> getRecipeList (String specificIngredient, String ingredient, String price, String mealtype, String cuisine) throws SQLException, ClassNotFoundException{
+    public static ArrayList<Recipe> getRecipeList (String specificIngredient, String ingredient, String price, String mealtype, String cuisine) throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Recipe> recipes = new ArrayList<Recipe>();
         Connection c = connect();
         
@@ -393,7 +396,7 @@ public class RecipeDataContext {
         return recipes;
     }
     
-    public static ArrayList<Categories> getBeverage() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getBeverage() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -419,7 +422,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getCondiment() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getCondiment() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -445,7 +448,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getFruit() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getFruit() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -471,7 +474,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getMeat() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getMeat() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -497,7 +500,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getPoultry() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getPoultry() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -523,7 +526,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getRice() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getRice() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -549,7 +552,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getSeafood() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getSeafood() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -575,7 +578,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getHerb() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getHerb() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -601,7 +604,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getVegetable() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getVegetable() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -627,7 +630,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getDairy() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getDairy() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -653,7 +656,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getPastry() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getPastry() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -679,7 +682,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-    public static ArrayList<Categories> getNoodle() throws SQLException, ClassNotFoundException{
+    public static ArrayList<Categories> getNoodle() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +
@@ -705,7 +708,7 @@ public class RecipeDataContext {
         return categories;
     }
     
-   public static ArrayList<Categories> getNuts() throws SQLException, ClassNotFoundException{
+   public static ArrayList<Categories> getNuts() throws SQLException, ClassNotFoundException, URISyntaxException{
         ArrayList<Categories> categories = new ArrayList<Categories>();
         Connection c = connect();
         statement = c.prepareStatement( "SELECT i.name\n" +

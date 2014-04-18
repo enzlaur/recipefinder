@@ -73,7 +73,8 @@ public class LoginServlet extends HttpServlet {
        
         try{
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password); 
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password); 
+            con = Database.getConnection();
             statement = con.prepareStatement("SELECT id, username FROM `admin` WHERE username = ? AND password = ?");
             statement.setString(1, username);
             statement.setString(2, password);

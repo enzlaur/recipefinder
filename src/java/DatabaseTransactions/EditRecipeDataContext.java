@@ -29,7 +29,8 @@ public class EditRecipeDataContext {
             float rprice = Float.parseFloat(price);
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             statement = con.prepareStatement("UPDATE recipe "
                     + "SET "
                     + "name = ?, "
@@ -87,7 +88,8 @@ public class EditRecipeDataContext {
             int newPreferenceId = Integer.parseInt(newPrefId);
             
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             statement = con.prepareStatement("UPDATE recipe_preference "+
                                             "SET "+
                                             "id_preference = ? "+
@@ -106,7 +108,8 @@ public class EditRecipeDataContext {
     public static void deleteRecipe(int id) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             statement = con.prepareStatement("DELETE from recipe where id = ?");
             statement.setInt(1, id);
             statement.executeUpdate();
@@ -122,7 +125,8 @@ public class EditRecipeDataContext {
             float rprice = Float.parseFloat(price);
 
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             statement = con.prepareStatement("insert into `recipe`(name, price, serving, time, procedures, description) values(?,?,?,?,?,?)",
                     PreparedStatement.RETURN_GENERATED_KEYS);
             statement.setString(1, name);

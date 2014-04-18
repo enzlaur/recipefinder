@@ -4,6 +4,8 @@
  */
 package servlets;
 
+import settings.Database;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -93,7 +95,8 @@ public class RecipePicServlet extends HttpServlet {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            //con = DriverManager.getConnection(Database.url, Database.username, Database.password);
+            con = Database.getConnection();
             if (request.getParameter("upload-type").matches("recipe-pic")) {
                 statement = con.prepareStatement("select id as filename from recipe where id=?");
                 statement.setInt(1, id);
