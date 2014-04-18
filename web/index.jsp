@@ -24,14 +24,8 @@
     ArrayList<Categories> noodle;
     ArrayList<Categories> nut;
     
-    /*
-    Laurenz Says: Ang gulo ng database connections code niyo :)))
-    lagay niyo sa settings/Database.java yung getConnection() tapos import niyo siya
-    */
-    // comment ng isang pagibig
-    //extra comment for testing hue hue
-    beverage = RecipeDataContext.getBeverage();    
-    condiment = RecipeDataContext.getCondiment();    
+    beverage = RecipeDataContext.getBeverage();
+    condiment = RecipeDataContext.getCondiment();
     fruit = RecipeDataContext.getFruit();
     meat = RecipeDataContext.getMeat();
     poultry = RecipeDataContext.getPoultry();
@@ -829,16 +823,15 @@
 
         <div class="border2"></div>
         <br />
-        
-        <span class="copyright">
-          <span class="left"><br>
-            &copy; Copyright 2012 - All Rights Reserved - <a href="#">Domain Name</a>
-          </span>
-          <span class="right"><br>
-            Design by <a href="http://www.priteshgupta.com">PriteshGupta.com</a>
-            <br><br><br>
-          </span>
-        </span>
+        <!--
+        Sorry Kuya Gupta
+            <span class="copyright">
+              <span class="right"><br>
+                Design by <a href="http://www.priteshgupta.com">PriteshGupta.com</a>
+                <br><br><br>
+              </span>
+            </span>
+        -->
       </footer>
     </div>
   </body>

@@ -141,10 +141,7 @@
 
           <br><br>
           
-          <p><%
-                recipe.getProcedure();
-          
-                  }%></p>
+          <p><%out.println(recipe.getProcedure());}%></p>
         </article>
         
         <aside class="sidebar">
@@ -1046,7 +1043,8 @@
         <center><a id="searchrecipe" class="button" href="#searchrecipe" onclick="getAllIngredients()" >Search recipes!</a></center>
 
         <br>
-
+        <!--
+        Sorry kuya Gupta :()
         <span class="copyright">
           <span class="left"><br>
             &copy; Copyright 2014 - All Rights Reserved - <a href="#">De La Salle University</a>
@@ -1056,6 +1054,7 @@
             <br><br><br>
           </span>
         </span>
+        -->
       </footer>
 
     </div>
